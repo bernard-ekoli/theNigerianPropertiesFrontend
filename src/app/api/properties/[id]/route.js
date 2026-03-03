@@ -7,7 +7,7 @@ export async function GET(req, context) {
 
     try {
         const res = await fetch(
-            `${process.env.backend_url}/api/listing/get-property?id=${id}`,
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/listing/get-property?id=${id}`,
             { cache: "no-store" }
         );
         if (!res.ok) {

@@ -6,7 +6,7 @@ export async function POST(req) {
         const { name, email, phone, message, listingId } = body;
         console.log("listingId:", name, email, phone, message, listingId);
         const res = await fetch(
-            `${process.env.backend_url}/api/send-agent-message`,
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/send-agent-message`,
             {
                 method: "POST",
                 headers: {

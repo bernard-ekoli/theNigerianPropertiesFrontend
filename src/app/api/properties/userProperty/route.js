@@ -5,7 +5,7 @@ export async function GET(req, context) {
     const cookies = req.headers.get("cookie") || "";
     try {
         const res = await fetch(
-            `${process.env.backend_url}/api/listing/user-listings`,
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/listing/user-listings`,
             {
                 method: "GET",
                 headers: {

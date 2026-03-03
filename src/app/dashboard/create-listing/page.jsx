@@ -106,7 +106,7 @@ export default function CreateListingPage() {
 
 
   const getSignature = async () => {
-    const res = await fetch(`${process.env.backend_url}/api/cloudinary/signature`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/cloudinary/signature`, {
       credentials: "include",
     });
     return res.json();

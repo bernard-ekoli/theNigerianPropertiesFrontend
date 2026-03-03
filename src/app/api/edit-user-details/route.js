@@ -12,7 +12,7 @@ export async function POST(req) {
         const body = await req.json()
         const { email, firstName, lastName, phone } = body
         console.log(email, firstName, lastName, phone)
-        const user = await fetch(`${process.env.backend_url}/api/users/edit-user-details`, {
+        const user = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/edit-user-details`, {
             headers: {
                 Cookie: `token=${token}`,
                 "Content-Type": "application/json",

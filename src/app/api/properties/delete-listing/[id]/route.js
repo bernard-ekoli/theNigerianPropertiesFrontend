@@ -10,7 +10,7 @@ export async function DELETE(req, { params }) {
         return NextResponse.json({ error: "No token provided" }, { status: 401 });
     }
     try {
-        const res = await fetch(`${process.env.backend_url}/api/listing/user-listing?id=${id}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/listing/user-listing?id=${id}`, {
             method: "DELETE",
             headers: {
                 Cookie: `token=${token}`,

@@ -12,7 +12,7 @@ export async function POST(req, { params }) {
     }
     try {
         console.log("Params:", id);
-        const res = await fetch(`${process.env.backend_url}/api/listing/user-listings?id=${id}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/listing/user-listings?id=${id}`, {
             method: "POST",
             body: JSON.stringify(body),
             headers: {

@@ -10,7 +10,7 @@ export async function GET(req) {
     }
 
     try {
-        const userResponse = await fetch(`${process.env.backend_url}/api/users/`, {
+        const userResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/`, {
             headers: { Cookie: `token=${token}` },
         });
 

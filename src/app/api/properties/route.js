@@ -6,7 +6,7 @@ export async function GET(req) {
         const searchParam = req.nextUrl.searchParams.get("page");
         const page = Math.max(1, parseInt(searchParam || "1", 10) || 1);
         const res = await fetch(
-            `${process.env.backend_url}/api/listing/all-listings?page=${page}`,
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/listing/all-listings?page=${page}`,
             { cache: "no-store" }
         );
         if (!res.ok) {

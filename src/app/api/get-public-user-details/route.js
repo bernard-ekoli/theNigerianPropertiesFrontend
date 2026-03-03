@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export async function GET(req, context) {
     try {
         const agentId = req.nextUrl.searchParams.get('agentId');
-        const res = await fetch(`${process.env.backend_url}/api/users/public-info?agentId=${agentId}`, { cache: 'no-store' });
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/public-info?agentId=${agentId}`, { cache: 'no-store' });
         if (!res.ok) {
             return NextResponse.json({ message: 'User not found' }, { status: res.status });
         }

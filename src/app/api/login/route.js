@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 export async function POST(req) {
     try {
         const body = await req.json()
-        const user = await fetch(`${process.env.backend_url}/api/users/login`, {
+        const user = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/login`, {
             method: 'POST',
             headers: { "Content-Type": "application/json" },
             credentials: "include",

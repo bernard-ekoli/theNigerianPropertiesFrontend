@@ -16,7 +16,7 @@ export async function POST(req) {
     try {
         const body = await req.json();
 
-        const res = await fetch(`${process.env.backend_url}/api/listing/create-listing`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/listing/create-listing`, {
             method: 'POST',
             headers: {
                 Cookie: `token=${token}`,
