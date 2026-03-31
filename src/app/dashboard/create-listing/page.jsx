@@ -1,8 +1,7 @@
-// app/create-listing/page.jsx
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import imageCompression from 'browser-image-compression';
 import { useRouter } from 'next/navigation';
 import {
   Home,
@@ -20,10 +19,12 @@ import Link from 'next/link';
 // Removed: import { CldUploadButton } from 'next-cloudinary';
 import '../../../styles/createListing.css';
 import formatCustomCurrency from '../../../../tools/formatCurrency'
+import PaystackPop from '@paystack/inline-js'
 
 // --- MAIN PAGE COMPONENT ---
 
 export default function CreateListingPage() {
+  const popup = new PaystackPop()
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -83,7 +84,6 @@ export default function CreateListingPage() {
     }
     getPrices()
   }, [router, formData.images]); // Add formData.images to dependency array for cleanup
-
   const uploadToCloudinary = async (file, sig) => {
     const formData = new FormData();
 
@@ -112,19 +112,28 @@ export default function CreateListingPage() {
     return res.json();
   };
 
-
+  const compressImage = async (file) => {
+    return await imageCompression(file, {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1280,
+      useWebWorker: true,
+    });
+  };
   const uploadImages = async (files) => {
     const sig = await getSignature();
 
     const uploads = await Promise.all(
-      files.map(file => uploadToCloudinary(file, sig))
+      files.map(async (file) => {
+        const compressed = await compressImage(file); // 🔥 NEW
+        return uploadToCloudinary(compressed, sig);
+      })
     );
 
     return uploads.map(img => ({
       url: img.secure_url,
       public_id: img.public_id,
     }));
-  };
+  }
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
@@ -139,29 +148,40 @@ export default function CreateListingPage() {
     }
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const newErrors = { ...errors };
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
+
     if (formData.images.length > 10) {
       newErrors.images = 'Maximum of 10 images allowed';
       setErrors(newErrors);
       return;
-    }; // Max 10 images
-    const newImages = files.map(file => ({
-      file,
-      previewUrl: URL.createObjectURL(file),
-    }));
+    }
+
+    const newImages = await Promise.all(
+      files.map(async (file) => {
+        // 🔥 compress for preview
+        const compressed = await imageCompression(file, {
+          maxSizeMB: 0.3,              // VERY small for preview
+          maxWidthOrHeight: 600,       // reduce resolution
+          useWebWorker: true,
+        });
+
+        return {
+          file, // keep original for upload (optional, see below)
+          previewUrl: URL.createObjectURL(compressed), // 🔥 use compressed
+        };
+      })
+    );
 
     setFormData(prev => ({
       ...prev,
       images: [...prev.images, ...newImages],
     }));
 
-    // Reset input so same file can be reselected
     e.target.value = null;
   };
-
 
   // --- (Validation and Cost Calculation) ---
 
@@ -199,17 +219,21 @@ export default function CreateListingPage() {
 
   const handleSubmit = async () => {
     if (!user || !validateForm()) return;
-    if(user.phone === "" || !user.phone){
-      alert("Please update your profile with a valid phone number before creating a listing.");
-      router.push('/dashboard/profile');
+
+    if (user.phone === "" || !user.phone) {
+      const confirmMessage = confirm("Please update your profile with a valid phone number before creating a listing.");
+      if (confirmMessage) router.push('/dashboard/profile');
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-
+      // 1. Upload Images
       const images = await uploadImages(formData.images.map(img => img.file));
+
+      console.log(images)
+
 
       const payload = {
         title: formData.title,
@@ -223,33 +247,102 @@ export default function CreateListingPage() {
         listingType: formData.listingType,
         featured: formData.featured,
         duration: formData.duration,
-        images: images, // already an array [{ url, public_id }]
+        images: images,
       };
 
-      const res = await fetch("/api/create-listing", {
+      // 2. Create the Listing
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/listing/create-listing`, {
         method: "POST",
         body: JSON.stringify(payload),
-        headers: {
-          "Content-Type": "application/json",
-        }
+        headers: { "Content-Type": "application/json" },
+        credentials: "include"
       });
+
+      // Read the stream ONCE
+      const listingDatares = await res.json();
+
       if (!res.ok) {
-        const errorResult = await res.json();
-        console.error("Create listing failed:", errorResult);
+        console.error("Create listing failed:", listingDatares);
+        alert(listingDatares.message || "Failed to create listing");
         setIsSubmitting(false);
         return;
       }
-      router.push('/dashboard');
+
+      // 3. Initialize Payment
+      const initializePayment = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/payment/initialize`, {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ listing_id: listingDatares.data.listingId }),
+        credentials: "include"
+      });
+
+      // Read the stream ONCE
+      const resData = await initializePayment.json();
+      console.log("This is the response data", resData)
+
+
+      if (!initializePayment.ok) {
+        throw new Error(resData.error || "Payment initialization failed");
+      }
+
+      // Use the variable directly (no more .json() calls)
+      const access_code = resData.access_code;
+
+      if (!access_code) {
+        throw new Error("No access code received from payment provider");
+      }
+
+      // 4. Open Payment Popup
+      popup.resumeTransaction(access_code, {
+        onSuccess: async (transaction) => {
+          // 5. Verify Payment
+          const verifyRes = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/payment/verify`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              reference: transaction.reference,
+              listing_id: listingDatares.data.listingId,
+            })
+          });
+
+          const verifyData = await verifyRes.json();
+
+          if (verifyData.success) {
+            // 6. Activate Listing
+            const activateListingRes = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/listing/activate-listing/${listingDatares.data.listingId}`, {
+              method: "GET",
+              credentials: "include"
+            });
+
+            const checkActiveListingRes = activateListingRes.json()
+            console.log(checkActiveListingRes)
+            if (!activateListingRes.ok) {
+              alert("Listing Activation Failed. Please contact support.");
+              return;
+            }
+
+            alert("Payment successful and listing activated!");
+            router.push('/dashboard');
+          } else {
+            alert("Payment verification failed. Please contact support.");
+          }
+        },
+
+        onCancel: () => {
+          console.log("User cancelled payment");
+          alert("Payment was cancelled.");
+        }
+      });
 
     } catch (error) {
-      console.error("Create listing error:", error);
+      console.error("Process error:", error);
+      alert(error.message || "An unexpected error occurred.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
 
-  // ... (Loading state and user checks remain the same) ...
   if (isLoading) {
     return (
       <div className="loading-container">

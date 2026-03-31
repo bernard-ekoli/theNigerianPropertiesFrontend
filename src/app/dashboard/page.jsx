@@ -36,7 +36,6 @@ export default function Dashboard() {
     })
     const [showMessage, setShowMessage] = useState(false)
     const [messages, setMessages] = useState([])
-    const [networkError, setNetworkError] = useState(false)
     const [loading, setLoading] = useState(true)
 
     // 1. First, fetch the user
@@ -50,7 +49,6 @@ export default function Dashboard() {
                 setUser(body.rest);
             } catch (error) {
                 console.error("User fetch error:", error);
-                setNetworkError(true)
             }
             setLoading(false)
         }

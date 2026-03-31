@@ -15,9 +15,10 @@ const AuthService = {
                 credentials: "include",
                 body: JSON.stringify({ email, password }),
             });
-
             const resData = await res.json();
-
+            if(res.status === 401){
+                return {success: false, message: resData.message || "Invalid Credentials"}
+            }
             if (!res.ok) {
                 return { success: false, message: resData.message || "Login failed" };
             }

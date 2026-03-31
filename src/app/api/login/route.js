@@ -11,7 +11,11 @@ export async function POST(req) {
         })
 
         const userRes = await user.json()
-        console.log(userRes.user._id)
+
+        console.log(user.status)
+        if (user.status === 401) {
+            return NextResponse.json({ success: false }, { status: 401 })
+        }
         if (!user.ok) {
             return NextResponse.json({ success: false }, { status: 400 })
         }
