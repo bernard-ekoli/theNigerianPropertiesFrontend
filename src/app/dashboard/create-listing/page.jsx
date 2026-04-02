@@ -462,7 +462,6 @@ export default function CreateListingPage() {
                       <optgroup label="Others">
                         <option value="land">Land</option>
                       </optgroup>
-
                     </select>
                   </div>
 
@@ -506,7 +505,7 @@ export default function CreateListingPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="price" className="dummy-label">{getPriceLabel()} per Month</label>
+                  <label htmlFor="price" className="dummy-label">{getPriceLabel()} per Year</label>
                   <div className="input-with-icon">
                     <span className="input-icon">₦</span>
                     <input
