@@ -19,12 +19,10 @@ import Link from 'next/link';
 // Removed: import { CldUploadButton } from 'next-cloudinary';
 import '../../../styles/createListing.css';
 import formatCustomCurrency from '../../../../tools/formatCurrency'
-import PaystackPop from '@paystack/inline-js'
 
 // --- MAIN PAGE COMPONENT ---
 
 export default function CreateListingPage() {
-  const popup = new PaystackPop()
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -230,6 +228,8 @@ export default function CreateListingPage() {
 
     try {
       // 1. Upload Images
+      const PaystackPop = (await import('@paystack/inline-js')).default;
+      const popup = new PaystackPop();
       const images = await uploadImages(formData.images.map(img => img.file));
 
       console.log(images)
