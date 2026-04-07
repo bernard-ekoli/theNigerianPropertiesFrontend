@@ -49,7 +49,9 @@ export default function CreateListingPage() {
 
   useEffect(() => {
     async function fetchUser() {
-      const res = await fetch('/api/get-user-details')
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/`, {
+        credentials: "include"
+      });
       const data = await res.json();
       console.log('User data fetched:', data);
       if (!res.ok) {
@@ -278,7 +280,6 @@ export default function CreateListingPage() {
 
       // Read the stream ONCE
       const resData = await initializePayment.json();
-      console.log("This is the response data", resData)
 
 
       if (!initializePayment.ok) {

@@ -9,15 +9,15 @@ import styles from "../../styles/auth.module.css";
 const AuthService = {
     signIn: async (email, password) => {
         try {
-            const res = await fetch("/api/login", {
-                method: "POST",
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/login`, {
+                method: 'POST',
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
-                body: JSON.stringify({ email, password }),
-            });
+                body: JSON.stringify({ email, password })
+            })
             const resData = await res.json();
-            if(res.status === 401){
-                return {success: false, message: resData.message || "Invalid Credentials"}
+            if (res.status === 401) {
+                return { success: false, message: resData.message || "Invalid Credentials" }
             }
             if (!res.ok) {
                 return { success: false, message: resData.message || "Login failed" };

@@ -59,7 +59,7 @@ This project is split into two repositories:
 - Backend repository  
   Handles authentication, database logic, image uploads, and API endpoints
 
-Both repositories belong to the same product.
+Both repositories belong tzo the same product.
 
 ---
 

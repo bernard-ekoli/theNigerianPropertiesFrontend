@@ -43,12 +43,20 @@ export default function Dashboard() {
         async function fetchUserData() {
             setLoading(true)
             try {
-                const response = await fetch('/api/get-user-details');
-                if (!response.ok) throw new Error('Failed to fetch user');
+                const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/me`, {
+                    credentials: "include", // 👈 sends the backend cookie
+                });
                 const body = await response.json()
-                setUser(body.rest);
+
+                if (!body.success) {
+                    router.push("/auth") // 👈 not authenticated, kick them out
+                    return
+                }
+
+                setUser(body.user);
             } catch (error) {
                 console.error("User fetch error:", error);
+                router.push("/auth")
             }
             setLoading(false)
         }
@@ -106,10 +114,16 @@ export default function Dashboard() {
         setShowMessage(true);
     }
     const handleLogout = async () => {
-        const res = await fetch('/api/logout')
-        if (res.ok) router.push('/auth')
-    }
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/logout`, {
+            method: "POST",
+            credentials: "include",
+        })
+        const data = await res.json()
 
+        if (data.success) {
+            router.push("/auth")
+        }
+    }
     const handleDeleteListing = async (listingId) => {
         if (confirm("Are you sure you want to delete this listing?")) {
             setLoading(true)
