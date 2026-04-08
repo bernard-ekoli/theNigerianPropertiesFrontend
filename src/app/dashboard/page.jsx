@@ -66,15 +66,19 @@ export default function Dashboard() {
 
     // 2. ONLY fetch listings once the user object exists
     useEffect(() => {
+        console.log(user)
         if (!user || !user._id) return;
 
         async function fetchListings() {
             setLoading(true)
             try {
-                const res = await fetch('/api/properties/userProperty', { cache: 'no-store' });
+                const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/listing/user-listings`, { credentials: 'include' });
+
                 if (!res.ok) throw new Error('Failed to fetch listings');
 
                 const data = await res.json();
+
+                console.log("These are the listing", data)
                 const allListings = data.listings || [];
 
                 const userListings = allListings.filter(l => l.userId === user._id);

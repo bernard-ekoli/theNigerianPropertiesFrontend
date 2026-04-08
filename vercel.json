@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "https://www.thenigerianproperties.com/:path*",
+      "destination": "https://thenigerianproperties.com/:path*",
+      "permanent": true
+    }
+  ]
+}
