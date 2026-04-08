@@ -132,7 +132,8 @@ export default function Dashboard() {
         if (confirm("Are you sure you want to delete this listing?")) {
             setLoading(true)
             // Add your API delete logic here
-            const res = await fetch(`/api/properties/delete-listing/${listingId}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/listing/user-listing?id=${listingId}`, {
+                credentials: "include",
                 method: "DELETE"
             })
             if (res.ok) {
