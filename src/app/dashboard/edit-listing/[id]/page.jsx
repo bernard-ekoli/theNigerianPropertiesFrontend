@@ -31,7 +31,7 @@ export default function EditListingPage() {
     }
     async function getproperties() {
       try {
-        const property = await fetch(`/api/properties/${listingId}`)
+        const property = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/listing/get-property?id=${listingId}`);
         if (!property.ok) {
           alert(property.statusText)
           router.push("/dashboard") // if not found, go back
@@ -112,12 +112,13 @@ export default function EditListingPage() {
       if (!formData.images || formData.images.length === 0) {
         throw new Error("At least one image is required")
       }
-
-      const res = await fetch(`/api/properties/edit-listing/${listingId}`, {
+      console.log(listingId)
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/listing/user-listings?id=${listingId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           title: formData.title,
           description: formData.description,
@@ -135,27 +136,6 @@ export default function EditListingPage() {
       }
 
       router.push("/dashboard")
-
-      // const userListings = JSON.parse(localStorage.getItem("userListings") || "[]")
-      /* 
-            const updated = {
-              ...listing,
-              title: formData.title,
-              description: formData.description,
-              price: formData.price,
-              location: formData.address,
-              beds: parseInt(formData.bedrooms),
-              baths: parseInt(formData.bathrooms),
-              area: parseInt(formData.area),
-              listingType: formData.listingType,
-            }
-      
-            const updatedListings = userListings.map((ad) =>
-              ad.id === listing.id ? updated : ad
-            )
-      
-            localStorage.setItem("userListings", JSON.stringify(updatedListings))
-            router.push("/dashboard") */
     } catch (e) {
       setError(e.message)
     } finally {

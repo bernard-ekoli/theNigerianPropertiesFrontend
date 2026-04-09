@@ -59,20 +59,33 @@ export default function PropertiesPage() {
   useEffect(() => {
     async function fetchUserData() {
       try {
-        const response = await fetch('/api/get-user-details');
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/`,
+          { credentials: "include" }
+        );
 
-        if (response.status === 404) {
-          // User does not exist
+        // ✅ First check HTTP status
+        if (!response.ok) {
+          console.log("User not authenticated or not found");
           setUserExists(false);
-        } else if (!response.ok) {
-          setUserExists(false);
-        } else {
-          setUserExists(true);
+          return;
         }
+
+        const data = await response.json();
+
+        // ✅ Check backend success flag
+        if (!data.success || !data.rest) {
+          console.log("Invalid user data");
+          setUserExists(false);
+          return;
+        }
+
+        // ✅ User exists
+        setUserExists(true);
+
       } catch (error) {
-        // Network error or fetch failed
-        console.error("User fetch error:", error);
-        // don’t touch userExists here
+        console.error("Fetch failed:", error);
+        setUserExists(false);
       }
     }
 
@@ -82,7 +95,7 @@ export default function PropertiesPage() {
   useEffect(() => {
     async function fetchProperties() {
       try {
-        const response = await fetch(`/api/properties?page=${page}`, { cache: "no-store" });
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/listing/all-listings?page=${page}`);
         const data = await response.json();
         console.log("Fetched properties:", data);
         if (data.listings.length === 0) {

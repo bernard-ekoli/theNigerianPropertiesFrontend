@@ -1,9 +1,7 @@
 "use client"
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
 import "../styles/page.css"
 import formatCustomCurrency from "../../tools/formatCurrency";
-import { set } from "mongoose";
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
   const [properties, setProperties] = useState([]);
@@ -92,8 +90,9 @@ export default function Home() {
     // Any necessary effect on component mount
     const fetchProperties = async () => {
       try {
-        const response = await fetch('/api/properties');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/listing/`);
         const data = await response.json();
+        console.log("THis is the data", data)
         setProperties(data.listings);
         console.log("Fetched properties:", data.listings);
       } catch (error) {
@@ -103,29 +102,29 @@ export default function Home() {
 
     fetchProperties();
   }, []);
-
   useEffect(() => {
     async function fetchUserData() {
       try {
-        const response = await fetch('/api/get-user-details');
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/`, {
+          credentials: "include"
+        })
 
-        if (response.status === 404) {
-          // User does not exist
-          setUserExists(false);
-        } else if (!response.ok) {
-          setUserExists(false);
-        } else {
-          setUserExists(true);
+        if (!res.ok) {
+          console.log("User Not Found or not authenticated")
+          setUserExists(false)
+          return
         }
+
+        setUserExists(true)
+
       } catch (error) {
-        // Network error or fetch failed
-        console.error("User fetch error:", error);
-        // don’t touch userExists here
+        console.error("User fetch error:", error)
+        setUserExists(false)
       }
     }
 
-    fetchUserData();
-  }, []);
+    fetchUserData()
+  }, [])
 
   return (
     <div className="page-container">

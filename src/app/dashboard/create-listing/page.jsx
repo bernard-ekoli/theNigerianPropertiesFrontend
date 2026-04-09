@@ -53,7 +53,6 @@ export default function CreateListingPage() {
         credentials: "include"
       });
       const data = await res.json();
-      console.log('User data fetched:', data);
       if (!res.ok) {
         setUser(null);
         setIsLoading(false);
@@ -66,9 +65,8 @@ export default function CreateListingPage() {
     async function getPrices() {
       try {
         setIsLoading(true)
-        const res = await fetch('/api/prices');
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/prices`);
         const result = await res.json();
-        console.log('Prices fetched:', result.data.prices);
         if (!res.ok) {
           console.error('Error fetching prices:', result.error || 'Unknown error');
           return;

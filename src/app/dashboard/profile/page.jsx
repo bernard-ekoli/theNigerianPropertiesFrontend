@@ -22,26 +22,41 @@ export default function ProfilePage() {
   useEffect(() => {
     async function getUser() {
       try {
-        const realUser = await fetch('/api/get-user-details');
-        const res = await realUser.json();
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/`,
+          { credentials: "include" }
+        );
 
-        const User = {
-          firstName: res.rest.firstName,
-          lastName: res.rest.lastName,
-          email: res.rest.email,
-          phone: res.rest.phone,
+        // ✅ First check HTTP status
+        if (!response.ok) {
+          console.log("User not authenticated or not found");
+          return;
+        }
+
+        const data = await response.json();
+
+        // ✅ Check backend success flag
+        if (!data.success || !data.rest) {
+          console.log("Invalid user data");
+          return;
+        }
+
+        const userObj = {
+          firstName: data.rest.firstName ?? "",
+          lastName: data.rest.lastName ?? "",
+          email: data.rest.email ?? "",
+          phone: data.rest.phone ?? "",
         };
 
-        setUser(User);
-        setFormData(prev => {
-          return{
+        setUser(userObj);
+
+        setFormData(prev => ({
           ...prev,
-          ...User,
-          phone: User.phone ?? ""
-          }
-        });
+          ...userObj
+        }));
+
       } catch (error) {
-        console.error(error);
+        console.error("Fetch failed:", error);
       }
     }
 
@@ -53,11 +68,6 @@ export default function ProfilePage() {
     const newErrors = {}
     if (!formData.firstName.trim()) newErrors.firstName = "First name is required"
     if (!formData.lastName.trim()) newErrors.lastName = "Last name is required"
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required"
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email is invalid"
-    }
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -69,16 +79,16 @@ export default function ProfilePage() {
   }
 
   const handleSubmit = async (e) => {
-    console.log(formData.phone.length)
     e.preventDefault()
     if (!validateForm()) return
 
     setLoading(true)
     try {
-      const res = await fetch('/api/edit-user-details', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/edit-user-details`, {
         method: 'POST',
-        headers: { "Content-Type": "application.json" },
-        body: JSON.stringify(formData)
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email: formData.email, firstName: formData.firstName, lastName: formData.lastName, phone: formData.phone })
       })
       const resData = await res.json()
       if (!res.ok) {
@@ -157,7 +167,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="field">
-              <label>Email Address *</label>
+              <label>Email Address</label>
               <input
                 type="email"
                 value={formData.email}
@@ -165,6 +175,7 @@ export default function ProfilePage() {
                 className={errors.email ? "error" : ""}
                 placeholder="Enter your email"
                 disabled
+                title="Email cant be edited"
               />
               {errors.email && <span className="error-text">{errors.email}</span>}
             </div>

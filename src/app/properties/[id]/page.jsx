@@ -52,7 +52,7 @@ const Bed = () => (
 );
 
 const Bath = () => (
-<svg className="icon-grey" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M360-240q17 0 28.5-11.5T400-280q0-17-11.5-28.5T360-320q-17 0-28.5 11.5T320-280q0 17 11.5 28.5T360-240Zm120 0q17 0 28.5-11.5T520-280q0-17-11.5-28.5T480-320q-17 0-28.5 11.5T440-280q0 17 11.5 28.5T480-240Zm120 0q17 0 28.5-11.5T640-280q0-17-11.5-28.5T600-320q-17 0-28.5 11.5T560-280q0 17 11.5 28.5T600-240ZM360-360q17 0 28.5-11.5T400-400q0-17-11.5-28.5T360-440q-17 0-28.5 11.5T320-400q0 17 11.5 28.5T360-360Zm120 0q17 0 28.5-11.5T520-400q0-17-11.5-28.5T480-440q-17 0-28.5 11.5T440-400q0 17 11.5 28.5T480-360Zm120 0q17 0 28.5-11.5T640-400q0-17-11.5-28.5T600-440q-17 0-28.5 11.5T560-400q0 17 11.5 28.5T600-360ZM280-480h400v-40q0-83-58.5-141.5T480-720q-83 0-141.5 58.5T280-520v40Zm62-60q8-51 46.5-85.5T480-660q53 0 91.5 34.5T618-540H342ZM160-80q-33 0-56.5-23.5T80-160v-640q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v640q0 33-23.5 56.5T800-80H160Zm0-80h640v-640H160v640Zm0 0v-640 640Z"/></svg>
+  <svg className="icon-grey" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M360-240q17 0 28.5-11.5T400-280q0-17-11.5-28.5T360-320q-17 0-28.5 11.5T320-280q0 17 11.5 28.5T360-240Zm120 0q17 0 28.5-11.5T520-280q0-17-11.5-28.5T480-320q-17 0-28.5 11.5T440-280q0 17 11.5 28.5T480-240Zm120 0q17 0 28.5-11.5T640-280q0-17-11.5-28.5T600-320q-17 0-28.5 11.5T560-280q0 17 11.5 28.5T600-240ZM360-360q17 0 28.5-11.5T400-400q0-17-11.5-28.5T360-440q-17 0-28.5 11.5T320-400q0 17 11.5 28.5T360-360Zm120 0q17 0 28.5-11.5T520-400q0-17-11.5-28.5T480-440q-17 0-28.5 11.5T440-400q0 17 11.5 28.5T480-360Zm120 0q17 0 28.5-11.5T640-400q0-17-11.5-28.5T600-440q-17 0-28.5 11.5T560-400q0 17 11.5 28.5T600-360ZM280-480h400v-40q0-83-58.5-141.5T480-720q-83 0-141.5 58.5T280-520v40Zm62-60q8-51 46.5-85.5T480-660q53 0 91.5 34.5T618-540H342ZM160-80q-33 0-56.5-23.5T80-160v-640q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v640q0 33-23.5 56.5T800-80H160Zm0-80h640v-640H160v640Zm0 0v-640 640Z" /></svg>
 );
 
 const Square = () => (
@@ -186,18 +186,34 @@ export default function PropertyDetailPage() {
   const [agentInfo, setAgentInfo] = useState(null)
   useEffect(() => {
     if (!params.id) {
-      router.push("/properties")
-      return
+      router.push("/properties");
+      return;
     }
 
-    const fetchProperty = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/properties/${params.id}`);
+
+        // 1. Fetch property
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/listing/get-property?id=${params.id}`);
         if (!res.ok) throw new Error("Failed to fetch");
+
         const data = await res.json();
-        setProperty(data.listing);
+        const listing = data.listing;
+        setProperty(listing);
         authService.incrementViews(params.id);
+
+        // 2. Immediately use listing (NOT state)
+        const agentinfores = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/public-info?agentId=${listing.userId}`,
+          { credentials: "include" }
+        );
+
+        if (!agentinfores.ok) throw new Error("Failed to fetch agent info");
+
+        const agentData = await agentinfores.json();
+        setAgentInfo(agentData);
+
       } catch (err) {
         console.error(err);
       } finally {
@@ -205,25 +221,8 @@ export default function PropertyDetailPage() {
       }
     };
 
-    fetchProperty();
-    const fetchAgentID = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch(`/api/properties/${params.id}`);
-        if (!res.ok) throw new Error("Failed to fetch agent ID");
-        const data = await res.json();
-        console.log("Agent ID:", data.listing.userId);
-        const agentinfores = await fetch(`/api/get-public-user-details?agentId=${data.listing.userId}`);
-        if (!agentinfores.ok) throw new Error("Failed to fetch agent info");
-        const agentData = await agentinfores.json();
-        console.log("Agent Info:", agentData);
-        setAgentInfo(agentData);
-      } catch (error) {
-        console.error("Error fetching agent ID:", error);
-      }
-    }
-    fetchAgentID();
-  }, [params.id])
+    fetchData();
+  }, [params.id]);
 
   const formatPrice = (price, listingType) => {
     const formatted = new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(price);
@@ -245,11 +244,13 @@ export default function PropertyDetailPage() {
     console.log()
     if (property) {
       authService.incrementInquiries(property._id)
-      const res = await fetch("/api/send-agent-message", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: contactForm.name, email: contactForm.email, phone: contactForm.phone, message: contactForm.message, listingId: property._id })
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/send-agent-message`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: contactForm.name, email: contactForm.email, phone: contactForm.phone, message: contactForm.message, listingId: property._id })
+        });
       console.log(property._id);
       if (!res.ok) {
         alert("Failed to send inquiry. Please try again later.")
