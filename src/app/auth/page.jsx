@@ -33,7 +33,7 @@ const AuthService = {
     signUp: async (data) => {
         try {
             const res = await fetch(
-                "/api/signup",
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/signup`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
