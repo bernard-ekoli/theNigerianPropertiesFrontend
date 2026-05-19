@@ -293,7 +293,7 @@ export default function Home() {
                       <div className="card-content">
                         <div className="card-header">
                           <h3 className="property-title">{property.title}</h3>
-                          <span className="property-price">{formatCustomCurrency("NGN", property.price)}</span>
+                          <span className="property-price">{formatCustomCurrency("NGN", property.price, { listingType: property.listingType })}</span>
                         </div>
                         <div className="property-location">
                           <MapPinIcon className="location-icon" />

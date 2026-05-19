@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
+import formatCustomCurrency from "../../../tools/formatCurrency"
 import "../../../styles/id.css"
 
 // Replaced imported components with simple JSX to reduce dependencies
@@ -224,12 +225,6 @@ export default function PropertyDetailPage() {
     fetchData();
   }, [params.id]);
 
-  const formatPrice = (price, listingType) => {
-    const formatted = new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(price);
-    if (listingType === "rent" || listingType === "lease") return `${formatted}/year`;
-    return formatted;
-  }
-
   const getListingTypeBadgeClass = (type) => {
     switch (type) {
       case "sale": return "badge-sale";
@@ -367,7 +362,7 @@ export default function PropertyDetailPage() {
               <CardHeader>
                 <div className="details-header">
                   <span className="details-title">{property.title}</span>
-                  <span className="price">{formatPrice(property.price, property.listingType)}</span>
+                  <span className="price">{formatCustomCurrency("NGN", property.price, { listingType: property.listingType })}</span>
                 </div>
                 <div className="address-container">
                   <MapPin className="icon-sm" />

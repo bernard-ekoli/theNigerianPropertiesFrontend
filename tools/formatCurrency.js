@@ -1,17 +1,22 @@
-function formatCustomCurrency(currencyCode, amount) {
-    const code = currencyCode.toUpperCase();
-    let symbol = '$';
+function formatCustomCurrency(currencyCode = 'NGN', amount = 0, options = {}) {
+    const code = (currencyCode || 'NGN').toUpperCase();
+    const numberValue = Number(amount);
+    const value = Number.isNaN(numberValue) ? 0 : numberValue;
+    const minimumFractionDigits = options.minimumFractionDigits ?? 0;
+    const maximumFractionDigits = options.maximumFractionDigits ?? 0;
 
-    if (code === 'NGN') {
-        symbol = '₦';
+    const formatted = new Intl.NumberFormat('en-NG', {
+        style: 'currency',
+        currency: code,
+        minimumFractionDigits,
+        maximumFractionDigits,
+    }).format(value);
+
+    if (options.listingType === 'rent' || options.listingType === 'lease') {
+        return `${formatted}/year`;
     }
 
-    let fixedAmount = Number(amount).toFixed(2);
-
-    // Regex to add commas for thousands separation
-    fixedAmount = fixedAmount.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-
-    return symbol + fixedAmount;
+    return formatted;
 }
 
 export default formatCustomCurrency;

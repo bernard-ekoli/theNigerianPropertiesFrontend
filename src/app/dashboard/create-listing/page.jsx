@@ -232,7 +232,6 @@ export default function CreateListingPage() {
       const popup = new PaystackPop();
       const images = await uploadImages(formData.images.map(img => img.file));
 
-      console.log(images)
 
 
       const payload = {

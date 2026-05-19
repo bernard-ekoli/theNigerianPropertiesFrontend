@@ -22,6 +22,7 @@ import {
     PhoneCall,
     MailOpen,
 } from "lucide-react"
+import formatCustomCurrency from "../../../tools/formatCurrency"
 
 export default function Dashboard() {
     const router = useRouter()
@@ -41,27 +42,35 @@ export default function Dashboard() {
     // 1. First, fetch the user
     useEffect(() => {
         async function fetchUserData() {
-            setLoading(true)
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/me`, {
-                    credentials: "include", // 👈 sends the backend cookie
-                });
-                const body = await response.json()
+                setLoading(true);
 
-                if (!body.success) {
-                    router.push("/auth") // 👈 not authenticated, kick them out
-                    return
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/me`,
+                    {
+                        credentials: "include",
+                    }
+                );
+
+                // if unauthorized
+                if (response.status === 401) {
+                    router.push("/auth");
+                    return;
                 }
 
+                const body = await response.json();
+
                 setUser(body.user);
+
             } catch (error) {
                 console.error("User fetch error:", error);
-                router.push("/auth")
+            } finally {
+                setLoading(false);
             }
-            setLoading(false)
         }
+
         fetchUserData();
-    }, [])
+    }, []);
 
 
     // 2. ONLY fetch listings once the user object exists
@@ -144,19 +153,6 @@ export default function Dashboard() {
             }
             setLoading(false)
         }
-    }
-
-    const formatPrice = (price, listingType) => {
-        if (!price) return "₦0";
-        const numPrice = Number.parseInt(price.toString().replace(/[^\d]/g, ""))
-        const formatted = new Intl.NumberFormat("en-NG", {
-            style: "currency",
-            currency: "NGN",
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-        }).format(numPrice)
-
-        return (listingType === "rent" || listingType === "lease") ? `${formatted}/year` : formatted
     }
 
     const getStatusBadge = (listing) => {
@@ -294,7 +290,7 @@ export default function Dashboard() {
                                             <div><span><Square className="icon-sm" /></span><span>{listing.sqft}Sqft</span></div>
                                         </div>
                                         <div className="listing-footer">
-                                            <span className="price">{formatPrice(listing.price, listing.listingType)}</span>
+                                            <span className="price">{formatCustomCurrency("NGN", listing.price, { listingType: listing.listingType })}</span>
                                             <div className="expires">
                                                 <Calendar className="icon-sm" />
                                                 Expires: {

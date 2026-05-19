@@ -164,17 +164,6 @@ export default function PropertiesPage() {
     setFilters((prev) => ({ ...prev, [key]: value }))
   }
 
-  const formatPrice = (price, listingType) => {
-    const formatted = new Intl.NumberFormat("en-NG", {
-      style: "currency",
-      currency: "NGN",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(price)
-    if (listingType === "rent" || listingType === "lease") return `${formatted}/year`
-    return formatted
-  }
-
   const getListingTypeBadgeClass = (type) => {
     switch (type) {
       case "sale": return "badge badge-sale";
@@ -289,7 +278,7 @@ export default function PropertiesPage() {
                 <CardContent className="card-content">
                   <div className="card-header">
                     <h3 className="property-title">{property.title}</h3>
-                    <span className="property-price">{formatPrice(property.price, property.listingType)}</span>
+                    <span className="property-price">{formatCustomCurrency("NGN", property.price, { listingType: property.listingType })}</span>
                   </div>
                   <div className="property-address">
                     <MapPin className="w-4 h-4 mr-1" />
