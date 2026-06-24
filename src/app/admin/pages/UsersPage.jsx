@@ -11,7 +11,7 @@ import SearchInput from "../SearchInput.jsx";
 
 export default function UsersPage({ users, setUsers }) {
   const [search, setSearch] = useState("");
-
+  console.log("users", users)
   const filtered = users.filter((u) =>
     [u.name, u.email, u.status, u.joined]
       .join(" ")
@@ -70,7 +70,7 @@ export default function UsersPage({ users, setUsers }) {
                     fontWeight: 600,
                   }}
                 >
-                  {u.listings}
+                  {u.listingsCount} Listings
                 </span>
               </TD>
               <TD style={{ color: C.textSecondary }}>{u.joined}</TD>
@@ -78,8 +78,11 @@ export default function UsersPage({ users, setUsers }) {
                 <Badge type={u.status} />
               </TD>
               <TD>
-                <ActionBtn variant="danger" onClick={() => handleDelete(u.id)}>
+                <ActionBtn variant="danger" onClick={() => handleDelete(u._id)}>
                   Delete
+                </ActionBtn>
+                <ActionBtn variant="approve" onClick={() => fetchUsersListing(u._id)}>
+                  Make Admin
                 </ActionBtn>
               </TD>
             </tr>

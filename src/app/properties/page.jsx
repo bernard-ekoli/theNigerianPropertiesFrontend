@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import "../../styles/properties.css"
+import  formatCustomCurrency from "../../../tools/formatCurrency.js"
 // Replaced imported components with simple JSX
 const Button = ({ onClick, className, children }) => (
   <button onClick={onClick} className={className}>

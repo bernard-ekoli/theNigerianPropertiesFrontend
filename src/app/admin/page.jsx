@@ -14,21 +14,21 @@ import {
   getSubListings,
   useWindowSize,
 } from "./utils.js";
-import NavItem        from "./NavItem.jsx";
-import DashboardPage  from "./pages/DashboardPage.jsx";
+import NavItem from "./NavItem.jsx";
+import DashboardPage from "./pages/DashboardPage.jsx";
 import PropertiesPage from "./pages/PropertiesPage.jsx";
-import UsersPage      from "./pages/UsersPage.jsx";
-import SettingsPage   from "./pages/SettingsPage.jsx";
+import UsersPage from "./pages/UsersPage.jsx";
+import SettingsPage from "./pages/SettingsPage.jsx";
 
 // ─── Nav config ───────────────────────────────────────────────────────────────
 // Add { id: "inquiries", label: "Inquiries", icon: "✉", section: null }
 // to show the InquiriesPage once you wire up the API.
 
 const NAV = [
-  { id: "dashboard",  label: "Dashboard",  icon: "▪", section: "Main"   },
-  { id: "properties", label: "Properties", icon: "⌂", section: null     },
-  { id: "users",      label: "Users",      icon: "☺", section: null     },
-  { id: "settings",   label: "Settings",   icon: "⚙", section: "System" },
+  { id: "dashboard", label: "Dashboard", icon: "▪", section: "Main" },
+  { id: "properties", label: "Properties", icon: "⌂", section: null },
+  { id: "users", label: "Users", icon: "☺", section: null },
+  { id: "settings", label: "Settings", icon: "⚙", section: "System" },
 ];
 
 // ─── Logo ─────────────────────────────────────────────────────────────────────
@@ -58,21 +58,20 @@ export default function TNPAdminPanel() {
   const { isMobile } = useWindowSize();
 
   // mounted gates fetch effects — prevents SSR mismatch
-  const [mounted, setMounted]           = useState(false);
-  const [sidebarOpen, setSidebarOpen]   = useState(false);
-  const [activePage, setActivePage]     = useState("dashboard");
+  const [mounted, setMounted] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activePage, setActivePage] = useState("dashboard");
 
   // Data state
-  const [users, setUsers]               = useState([]);
+  const [users, setUsers] = useState([]);
   const [stats, setStats] = useState([
-    { label: "Total Listings",   value: 0, sub: "+0 this week", subColor: C.greenMid, icon: "🏠" },
-    { label: "Pending Approval", value: 0, sub: "Needs review", subColor: C.amber,    icon: "⏳" },
-    { label: "Total Users",      value: 0, sub: "+0 this week", subColor: C.greenMid, icon: "👤" },
+    { label: "Total Listings", value: 0, sub: "+0 this week", subColor: C.greenMid, icon: "🏠" },
+    { label: "Pending Approval", value: 0, sub: "Needs review", subColor: C.amber, icon: "⏳" },
+    { label: "Total Users", value: 0, sub: "+0 this week", subColor: C.greenMid, icon: "👤" },
   ]);
-  const [properties,     setProperties]     = useState([]);
+  const [properties, setProperties] = useState([]);
   const [recentListings, setRecentListings] = useState([]);
-  const [recentUsers,    setRecentUsers]    = useState([]);
-
+  const [recentUsers, setRecentUsers] = useState([]);
   // ── Mount guard ────────────────────────────────────────────────────────────
   useEffect(() => { setMounted(true); }, []);
 
@@ -101,12 +100,12 @@ export default function TNPAdminPanel() {
           data.slice(0, 5).map((u) => {
             const name = `${u.firstName || ""} ${u.lastName || ""}`.trim();
             return {
-              initials:    name.slice(0, 2).toUpperCase().replace(/[^A-Z0-9]/g, ""),
-              name:        name || u.email,
-              sub:         u.role || "user",
-              avatarBg:    u.avatarBg    || "#E9E5FB",
+              initials: name.slice(0, 2).toUpperCase().replace(/[^A-Z0-9]/g, ""),
+              name: name || u.email,
+              sub: u.role || "user",
+              avatarBg: u.avatarBg || "#E9E5FB",
               avatarColor: u.avatarColor || "#4C35B5",
-              joined:      `Joined ${formatUserJoinDate(u.createdAt)}`,
+              joined: `Joined ${formatUserJoinDate(u.createdAt)}`,
             };
           })
         );
@@ -147,11 +146,11 @@ export default function TNPAdminPanel() {
         );
         setRecentListings(
           listings.slice(0, 5).map((l) => ({
-            initials:    l.title.slice(0, 3).toUpperCase().replace(/[^A-Z0-9]/g, ""),
-            title:       l.title.length > 20 ? l.title.slice(0, 17) + "…" : l.title,
-            sub:         `For ${l.listingType} • ${formatCustomCurrency("NGN", l.price)}/yr`,
-            status:      l.status,
-            avatarBg:    l.avatarBg    || C.greenLight,
+            initials: l.title.slice(0, 3).toUpperCase().replace(/[^A-Z0-9]/g, ""),
+            title: l.title.length > 20 ? l.title.slice(0, 17) + "…" : l.title,
+            sub: `For ${l.listingType} • ${formatCustomCurrency("NGN", l.price)}/yr`,
+            status: l.status,
+            avatarBg: l.avatarBg || C.greenLight,
             avatarColor: l.avatarColor || C.green,
           }))
         );
@@ -160,16 +159,17 @@ export default function TNPAdminPanel() {
       }
     }
 
+
     fetchUsers();
     fetchListings();
   }, [mounted]);
 
   // ── Page map ───────────────────────────────────────────────────────────────
   const pages = {
-    dashboard:  <DashboardPage  stats={stats} recentListings={recentListings} recentUsers={recentUsers} />,
+    dashboard: <DashboardPage stats={stats} recentListings={recentListings} recentUsers={recentUsers} />,
     properties: <PropertiesPage properties={properties} setProperties={setProperties} />,
-    users:      <UsersPage      users={users} setUsers={setUsers} />,
-    settings:   <SettingsPage />,
+    users: <UsersPage users={users} setUsers={setUsers} />,
+    settings: <SettingsPage />,
   };
 
   const pageTitles = {

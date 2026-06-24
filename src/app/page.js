@@ -125,7 +125,27 @@ export default function Home() {
 
     fetchUserData()
   }, [])
+  const popularLocations = [
+    { name: "Lagos", detail: "Lekki, Ikoyi, Victoria Island", count: "2,400+ listings" },
+    { name: "Abuja", detail: "Maitama, Wuse, Asokoro", count: "1,180+ listings" },
+    { name: "Port Harcourt", detail: "GRA, Trans Amadi, Old GRA", count: "640+ listings" },
+    { name: "Ibadan", detail: "Bodija, Akobo, Ring Road", count: "520+ listings" },
+  ];
 
+  const propertyCategories = [
+    { title: "Homes for Sale", description: "Detached houses, terraces, duplexes, and luxury apartments.", href: "/properties?listingType=sale" },
+    { title: "Rental Apartments", description: "Short-let, yearly rent, serviced apartments, and family homes.", href: "/properties?listingType=rent" },
+    { title: "Land & Estates", description: "Verified plots, gated estates, and development land.", href: "/properties?propertyType=land" },
+    { title: "Commercial Spaces", description: "Offices, shops, warehouses, and mixed-use buildings.", href: "/properties?propertyType=commercial" },
+  ];
+
+  const homeSteps = [
+    { title: "Search your area", description: "Filter by city, budget, property type, and listing purpose." },
+    { title: "Compare listings", description: "Review photos, prices, location details, and key amenities." },
+    { title: "Contact safely", description: "Reach the listing owner or agent and schedule an inspection." },
+  ];
+
+  const featuredProperties = properties?.slice(0, 6) || [];
   return (
     <div className="page-container">
       {/* Header */}
@@ -189,45 +209,68 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="hero-section">
-        <div className="container hero-text-container">
-          <h1 className="hero-title">
-            Find Your Perfect
-            <span>Nigerian Home</span>
-          </h1>
-          <p className="hero-subtitle">
-            Discover thousands of properties across Nigeria for sale, rent, and lease. Your next home is just a click
-            away.
-          </p>
+        <div className="container hero-grid">
+          <div className="hero-copy">
+            <span className="hero-kicker">Verified Nigerian property listings</span>
+            <h1 className="hero-title">
+              Find Your Perfect
+              <span>Nigerian Home</span>
+            </h1>
+            <p className="hero-subtitle">
+              Search homes, apartments, land, and commercial properties across Nigeria with clear prices,
+              useful details, and faster ways to connect.
+            </p>
 
-          {/* Search Bar */}
-          <div className="search-bar-card card">
-            <div className="search-input-items display-flex">
-              <div className="search-input-col display-flex-center">
-                <div className="display-flex-center searchInput">
-                  <SearchIcon />
-                  <input
-                    placeholder="Search by location, property type..."
-                    className="hundred"
-                    type="text"
-                  />
+            <div className="search-bar-card card">
+              <div className="search-input-items display-flex">
+                <div className="search-input-col display-flex-center">
+                  <div className="display-flex-center searchInput">
+                    <SearchIcon />
+                    <input placeholder="Search by location, property type..." className="hundred" type="text" />
+                  </div>
+                </div>
+                <div className="search-filter-group">
+                  <select className="search-select">
+                    <option>Property Type</option>
+                    <option>House</option>
+                    <option>Commercial</option>
+                    <option>Land</option>
+                  </select>
                 </div>
               </div>
-              <div>
-                <select className="search-select">
-                  <option>Property Type</option>
-                  <option>House</option>
-                  <option>Commercial</option>
-                  <option>Land</option>
-                </select>
-              </div>
-            </div>
-            <div>
               <a href="/properties" className="btn btn-green search-btn hundredW">
-                <SearchIcon className="search-icon-small" />
-                Search
+                <SearchIcon />
+                Search Properties
               </a>
             </div>
+
+            <div className="popular-searches">
+              <span>Popular:</span>
+              <a href="/properties?location=Lagos">Lagos</a>
+              <a href="/properties?location=Abuja">Abuja</a>
+              <a href="/properties?propertyType=land">Land</a>
+              <a href="/properties?listingType=rent">For Rent</a>
+            </div>
           </div>
+
+          <aside className="hero-market-card">
+            <div className="market-card-top">
+              <span>Live market snapshot</span>
+              <strong>10,000+</strong>
+              <small>properties listed nationwide</small>
+            </div>
+            <div className="market-list">
+              {popularLocations.map((location) => (
+                <a href={`/properties?location=${location.name}`} className="market-row" key={location.name}>
+                  <div>
+                    <strong>{location.name}</strong>
+                    <span>{location.detail}</span>
+                  </div>
+                  <small>{location.count}</small>
+                </a>
+              ))}
+            </div>
+          </aside>
         </div>
       </section>
 
@@ -267,108 +310,101 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Properties */}
-      {properties?.length > 0 && (
-
-        <section className="featured-properties-section">
-          <div className="container">
-            <div className="section-header">
-              <h2 className="section-title">Featured Properties</h2>
-              <p className="section-subtitle">Discover our handpicked selection of premium Nigerian properties</p>
-            </div>
-
-            <div className="property-flex">
-              {properties.map((property) => {
-                return (
-                  <div key={property._id} className="card property-card">
-                    <a href={`/properties/${property._id}`} target="_blank">
-                      <div className="card-image-wrapper">
-                        <img src={property.images[0]?.url} alt={property.title} className="card-image" />
-                        <span className="badge card-badge sale">{property.listingType === "sale" && "For Sale"}{property.listingType === "rent" && "For Rent"}{property.listingType === "lease" && "For Lease"}</span>
-                        {property.featured && <span className="badge card-badge featured">
-                          <StarIcon className="badge-icon" />
-                          Featured
-                        </span>}
-                      </div>
-                      <div className="card-content">
-                        <div className="card-header">
-                          <h3 className="property-title">{property.title}</h3>
-                          <span className="property-price">{formatCustomCurrency("NGN", property.price, { listingType: property.listingType })}</span>
-                        </div>
-                        <div className="property-location">
-                          <MapPinIcon className="location-icon" />
-                          <span className="location-text">{property.address}</span>
-                        </div>
-                        <div className="property-details">
-                          <div className="detail-item">
-                            <BedIcon className="detail-icon" />
-                            <span className="detail-text">{property.beds} beds</span>
-                          </div>
-                          <div className="detail-item">
-                            <BathIcon className="detail-icon" />
-                            <span className="detail-text">{property.baths} baths</span>
-                          </div>
-                          <div className="detail-item">
-                            <SquareIcon className="detail-icon" />
-                            <span className="detail-text">{property.sqft} sqft</span>
-                          </div>
-                        </div>
-                      </div>
-                    </a>
-                  </div>
-                )
-              })}
-              {/* Test Layout Below */}
-              {/*           <div className="card property-card">
-                <div className="card-image-wrapper">
-                  <img
-                    src="https://placehold.co/400x250/F0FDF4/16A34A?text=Modern+House+Lagos"
-                    alt="Modern House Lagos"
-                    className="card-image"
-                  />
-                  <span className="badge card-badge sale">For Sale</span>
-                  <span className="badge card-badge featured">
-                    <StarIcon className="badge-icon" />
-                    Featured
-                  </span>
-                </div>
-                <div className="card-content">
-                  <div className="card-header">
-                    <h3 className="property-title">Modern Family Home</h3>
-                    <span className="property-price">₦85M</span>
-                  </div>
-                  <div className="property-location">
-                    <MapPinIcon className="location-icon" />
-                    <span className="location-text">
-                      Victoria Island, Lagos
-                    </span>
-                  </div>
-                  <div className="property-details">
-                    <div className="detail-item">
-                      <BedIcon className="detail-icon" />
-                      <span className="detail-text">4 beds</span>
-                    </div>
-                    <div className="detail-item">
-                      <BathIcon className="detail-icon" />
-                      <span className="detail-text">3 baths</span>
-                    </div>
-                    <div className="detail-item">
-                      <SquareIcon className="detail-icon" />
-                      <span className="detail-text">2,500 sqft</span>
-                    </div>
-                  </div>
-                </div>
-              </div> */}
-            </div>
-
-            <div className="cta-button-wrapper">
-              <a href="/properties" className="btn btn-green view-all-button btn-lg">
-                View All Properties
-              </a>
-            </div>
+      <section className="category-section">
+        <div className="container">
+          <div className="section-header compact">
+            <h2 className="section-title">Browse by Property Need</h2>
+            <p className="section-subtitle">Give visitors more paths into the catalogue immediately.</p>
           </div>
-        </section>
-      )}
+          <div className="category-grid">
+            {propertyCategories.map((category) => (
+              <a href={category.href} className="category-card" key={category.title}>
+                <span>{category.title}</span>
+                <p>{category.description}</p>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Properties */}
+      <section className="featured-properties-section">
+        <div className="container">
+          <div className="section-header section-header-row">
+            <div>
+              <h2 className="section-title">Featured Properties</h2>
+              <p className="section-subtitle">Fresh homes, land, and commercial listings from across Nigeria.</p>
+            </div>
+            <a href="/properties" className="btn btn-outline">View All</a>
+          </div>
+
+          {featuredProperties.length > 0 ? (
+            <div className="property-flex">
+              {featuredProperties.map((property) => (
+                <div key={property._id} className="card property-card">
+                  <a href={`/properties/${property._id}`}>
+                    <div className="card-image-wrapper">
+                      <img src={property.images[0]?.url} alt={property.title} className="card-image" />
+                      <span className="badge card-badge sale">
+                        {property.listingType === "sale" && "For Sale"}
+                        {property.listingType === "rent" && "For Rent"}
+                        {property.listingType === "lease" && "For Lease"}
+                      </span>
+                      {property.featured && (
+                        <span className="badge card-badge featured">
+                          <StarIcon />
+                          Featured
+                        </span>
+                      )}
+                    </div>
+                    <div className="card-content">
+                      <div className="card-header">
+                        <h3 className="property-title">{property.title}</h3>
+                        <span className="property-price">
+                          {formatCustomCurrency("NGN", property.price, { listingType: property.listingType })}
+                        </span>
+                      </div>
+                      <div className="property-location">
+                        <MapPinIcon />
+                        <span className="location-text">{property.address}</span>
+                      </div>
+                      <div className="property-details">
+                        <div className="detail-item"><BedIcon /><span>{property.beds || 0} beds</span></div>
+                        <div className="detail-item"><BathIcon /><span>{property.baths || 0} baths</span></div>
+                        <div className="detail-item"><SquareIcon /><span>{property.sqft || "N/A"} sqft</span></div>
+                      </div>
+                    </div>
+                  </a>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="property-empty-state">
+              <h3>Listings are loading</h3>
+              <p>Visitors can still browse popular property types and locations while fresh listings appear.</p>
+              <a href="/properties" className="btn btn-green">Browse All Properties</a>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="how-it-works-section">
+        <div className="container">
+          <div className="section-header compact">
+            <h2 className="section-title">How It Works</h2>
+            <p className="section-subtitle">A simple path from search to inspection.</p>
+          </div>
+          <div className="steps-grid">
+            {homeSteps.map((step, index) => (
+              <div className="step-card" key={step.title}>
+                <span>{index + 1}</span>
+                <h3>{step.title}</h3>
+                <p>{step.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* CTA Section */}
       <section className="cta-section">

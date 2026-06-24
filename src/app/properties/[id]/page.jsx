@@ -210,6 +210,7 @@ export default function PropertyDetailPage() {
           { credentials: "include" }
         );
 
+        console.log("This is the agent information ", agentinfores)
         if (!agentinfores.ok) throw new Error("Failed to fetch agent info");
 
         const agentData = await agentinfores.json();
